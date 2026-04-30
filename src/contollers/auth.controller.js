@@ -1,26 +1,29 @@
-import { User } from "../shared/models/user.model.js";
-
-import { compare } from "bcryptjs";
-
-import jwt from "jsonwebtoken";
+import { StatusCodes } from "http-status-codes";
 import { SuccessResponse } from "../shared/responseProcessor.js";
+import { compare, hash } from "bcryptjs";
+import { User } from "../shared/models/user.model.js";
 import { BadRequestError } from "../shared/error.js";
+import jwt from "jsonwebtoken";
+import  {generateToken} from '../shared/utils/jwt.js'
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const NODE_ENV = process.env.NODE_ENV;
 
 // SIGNUP
 const signupController = async (req, res) => {
-  const { username, password, displayName } = req.body;
+  const {data} = req;
+  console.log({data});
+  const createUser =  await User.create(data);
+  // const newUser = new User(data); // sync or async ? --> sync
+  // const createUser = await  newUser.save(); //  
+  const userObj = createUser.toObject();
+  delete userObj.password;
+  return new SuccessResponse(userObj, "User Created Successfully", StatusCodes.CREATED);
 
-  // create user
-  const user = await User.create({ username, password, displayName });
-
-  // generate token (AUTO LOGIN)
   const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
     expiresIn: "3h",
   });
 
-  // send cookie
   res.cookie("token", token, {
     httpOnly: true,
   });
@@ -29,27 +32,31 @@ const signupController = async (req, res) => {
 };
 
 // LOGIN
-const loginController = async (req, res) => {
-  const { username, password } = req.body;
 
-  const user = await User.findOne({ username }).select("+password");
+const loginController = async(req, res, next)=>{
+    const {data} = req;
+    const {username} = data;
+    console.log({data});
+    const findUser = await User.findOne({username}).select("+password");
+    console.log({findUser});
+    if(!findUser) return new BadRequestError("Invalid Credentials");
+    const match = await compare(data.password, findUser.password);
+    if(!match) return new BadRequestError("Invalid Credentials");
+    console.log({id: findUser.id});
 
-  if (!user) 
-    throw new BadRequestError("Invalid credential");
-
-  const isMatch = await compare(password, user.password);
-
-  if (!isMatch) throw new BadRequestError("Invalid credentials");
-
-  const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-    expiresIn: "3h",
-  });
-
-  res.cookie("token", token, {
-    httpOnly: true,
-  });
-
-  return new SuccessResponse({ token }, "Login successful");
-};
+    
+    // const token = jwt.sign({id: findUser._id, role: findUser.role}, JWT_SECRET, { expiresIn : '3h'})
+    const token = generateToken({
+        id: findUser._id, role: findUser.role
+    })
+    
+    res.cookie("token", token, {
+        maxAge: 1000*60*60*3,
+        httpOnly: true, // prevent xss attacks
+        sameSite: "strict", // csrf attacks
+        secure: NODE_ENV != "Development",
+    });
+    return new SuccessResponse({token});
+}
 
 export { signupController, loginController};

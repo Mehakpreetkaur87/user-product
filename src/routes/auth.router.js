@@ -5,15 +5,13 @@ import {
     userPutValidationChain, userPostValidationChains,
     postCredGetMeChain
 } from "../validationChains/user.validation.js"
-
 import { responseProcessor } from "../shared/responseProcessor.js";
-import {signupController, loginController} from "../contollers/signup.controller.js"
 
+import { signupController, loginController } from "../contollers/auth.controller.js";
 const router = Router();
 
 router.post('/signup', validate(userPostValidationChains), responseProcessor(signupController));
 console.log("Auth routes loaded");
-
 
 // login
 
