@@ -2,9 +2,9 @@ import { StatusCodes } from "http-status-codes";
 
 class ApiError extends Error{
     constructor(statusCode, message){
-        super(message);
-        this.statusCode = statusCode;
-        this.name = "Api Error";
+        super(message); // passes message to the original Error 
+        this.statusCode = statusCode; //stores HTTP status (e.g., 400, 404)
+        this.name = "Api Error"; //custom error name
     }
 }
 

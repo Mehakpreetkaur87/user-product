@@ -35,8 +35,10 @@ const postVerifyTokenController = async(req, res, next)=>{
 }
 
 export {
+  
     getUsersController,
     postCreateUserController,
+  
     getJWTController,
     postVerifyTokenController
 }

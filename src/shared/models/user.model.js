@@ -21,6 +21,12 @@ const userSchema = new Schema({
         type: String,
         required: true,
         select: false
+    },
+    role: {
+        type: String,
+        enum: ["user", "admin"],
+        required: true,
+        default: "user"        
     }
 },{
     timestamps: true
@@ -31,8 +37,4 @@ userSchema.pre("save", async function(next){
     this.password = await hash(this.password, 10);
 })
 
-const User = model("User", userSchema);
-
-export {
-    User
-}
+export const User = model("User", userSchema);

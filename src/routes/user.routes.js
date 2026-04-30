@@ -1,6 +1,9 @@
 import {Router} from "express";
-import { paginationMiddleware, resolveUserById, userPostValidationChains, userPutValidationChain, postCredGetMeChain, validate } from "../../middleware.js";
-import { getUsersController, postCreateUserController, getJWTController, postVerifyTokenController } from "./users.controller.js";
+
+import { paginationMiddleware } from "../shared/middleware/pagination.middleware.js";
+import { userPostValidationChains, postCredGetMeChain, resolveUserById , userPutValidationChain} from "../validationChains/user.validation.js";
+import { getUsersController, postCreateUserController, getJWTController, postVerifyTokenController } from "../contollers/user.controller.js";
+import { validate } from "../validationChains/user.validation.js";
 import { USERS } from "../shared/data.js";
 import { responseProcessor } from "../shared/responseProcessor.js";
 import { compare, hash } from "bcryptjs";
@@ -18,7 +21,7 @@ userRoutes.get("/set-cookie",(req, res)=>{
     return res.status(200).send(USERS[0]);
 })
 
-userRoutes.get("/get-cookie",(req, res)=>{
+userRoutes.get("/get-cookie",(req, res)=>{ 
     console.log(req.cookies);
     // console.log({"req.headers.cookie": req.headers.cookie});
     return res.status(200).send(USERS[0]);
@@ -26,10 +29,7 @@ userRoutes.get("/get-cookie",(req, res)=>{
 
 userRoutes.get("/get-jwt", responseProcessor(getJWTController))
 userRoutes.post("/verify-jwt", responseProcessor(postVerifyTokenController))
-
-
 userRoutes.get("/users", paginationMiddleware(USERS), responseProcessor(getUsersController));
-
 
 userRoutes.post("/users", validate(userPostValidationChains), responseProcessor(postCreateUserController))
 

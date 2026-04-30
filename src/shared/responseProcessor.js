@@ -10,7 +10,7 @@ const responseProcessor = (handlerFunction)=>{
                 statusCode: response.statusCode,
                 message: response.message
             });
-
+            
             return res.status(StatusCodes.OK).send({
                     data: response,
                     statusCode: StatusCodes.OK,
