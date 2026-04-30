@@ -10,6 +10,13 @@ const getProducts = async () =>{
     return new SuccessResponse(products);
 };
 
+// get product id 
+const getProductById = async (req, res) => {
+    const { id } = req.params;
+    const findProduct = await Product.findById(id);
+    if (!findProduct) throw new BadRequestError("Product not found!");
+    return new SuccessResponse(findProduct, StatusCodes.OK, "Product fetched successfully");
+};
 // create
 
 const createProduct = async(req) =>{
@@ -28,6 +35,7 @@ const deleteProduct = async(req) =>{
 
 export {
     getProducts, 
+    getProductById, 
     createProduct,
     deleteProduct
 }

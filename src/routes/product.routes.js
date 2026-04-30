@@ -2,13 +2,14 @@ import { Router } from "express";
 import { isAdmin } from "../shared/middleware/user.middleware.js";
 import { checkAuth } from "../shared/middleware/auth.middleware.js";
 import { getProducts, createProduct, deleteProduct } from "../contollers/product.controller.js";
-
-
 import { responseProcessor } from "../shared/responseProcessor.js";
+import { paginationMiddleware } from "../shared/middleware/pagination.middleware.js";
+import { Product } from "../shared/models/product.model.js";
+import { validProduct } from "../shared/middleware/product.middleware.js";
 const router = Router();
 
 // GET → public
-router.get("/products", responseProcessor(getProducts));
+router.get("/products",checkAuth,paginationMiddleware(Product), responseProcessor(getProducts));
 
 // POST → admin only
 router.post(
